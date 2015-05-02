@@ -6,6 +6,9 @@
 % a interoplation type ('2D' or '3D' for reduction and extention methods,
 % respectively
 %
+% optionally input the loop interation to start the interpolation, incase this
+% is a restart of a failed run
+%
 % open the output file if it exists and count the number of rows. if it
 % doesn't exist, create it. Set the number of rows in the file to n
 %
@@ -14,19 +17,28 @@
 %
 % Print out time statistics
 %
-function res = LOOCV(A, filename, type)
+function res = LOOCV(A, filename, type, startat)
 
-    if (nargin ~= 3)
+    if (nargin < 3)
         error('Error - LOOCV required 3 input arguments');
     end
     
     if type ~= '2D' & type ~= '3D'
         error('Interpolation type must be 2D or 3D');
     end
-
-    s = size(A,1);
-    res = zeros(s,6);
     
+    if  nargin == 3
+        %backup existing data file, starting from scratch
+        if exist(filename, 'file')==2
+            movefile(filename,sprintf('%s_backup_%s',filename,datestr(clock,'yyyymmddHHMMss')));
+        end
+        startat = 0;
+    end
+
+    s = size(A,1);  
+    
+    %preallocate array
+    res = zeros(s,6);
 
     %run triangulations in chunks of C
     %output metrics after each chuck to determine runtime length
@@ -36,10 +48,16 @@ function res = LOOCV(A, filename, type)
     
     left = s;
     
+    %if restarting an earlier operation, subtract the rows corresponding to
+    %the number of loops being skipped
+    if nargin == 4
+        left = left - startat * C;
+    end
+    
     fullloop = tic;
-    for i = 0 : 0%outerloops -1
-        
-       
+    for i = startat : outerloops -1
+            
+      
        
        if left > C
         numpar = C;
@@ -60,6 +78,9 @@ function res = LOOCV(A, filename, type)
 
         end
         e=toc(s);
+        
+        %write to file 
+        dlmwrite(sprintf('%s/%s',pwd,filename),res(first:last,:),'-append','delimiter','\t','precision',12); 
         
         sprintf('finished loop %d in %f seconds, estimated hours remaining %f', i+1, e, ((outerloops - i - 1) * e)/60/60)
     end
