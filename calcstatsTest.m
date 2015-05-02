@@ -1,0 +1,1 @@
+S = calcstats(sprintf('%s\\CV',pwd))
