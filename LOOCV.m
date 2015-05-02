@@ -36,7 +36,7 @@ function res = LOOCV(A, filename, type)
     
     left = s;
     
-    start = cputime;
+    fullloop = tic;
     for i = 0 : 0%outerloops -1
         
        
@@ -52,18 +52,18 @@ function res = LOOCV(A, filename, type)
        first = i * C + 1
        last = i * C + numpar
        
-        t=cputime;
+        s = tic;
         parfor n = first:last
             
 
            res(n,:) =  LOOCV_i(A,n,type);
 
         end
-        e=cputime - t;
+        e=toc(s);
         
-        sprintf('finished loop %d in %f seconds, estimated hours remaining %f', i+1, e, (outerloops - i -1 * e)/60/60)
+        sprintf('finished loop %d in %f seconds, estimated hours remaining %f', i+1, e, ((outerloops - i - 1) * e)/60/60)
     end
-    finished = cputime - start;
+    finished = toc(fullloop);
 
     sprintf('done in %f seconds', finished)
        
