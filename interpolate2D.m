@@ -34,9 +34,9 @@ function [res, dtMesh, Da, T] = interpolate2D(A,B, dtMesh, Da, T)
                 vq = repmat(Apart(:,4),size(T,1),1);
             else
                 vq = interp1(Apart(:,1),Apart(:,4),T);
-
-                %set all NaN to the mean value to prevent missing vales in later steps
-                avg = mean(vq(~isnan(vq)));
+   
+                %set all NaN to the mean value to prevent missing values in later steps
+                avg = mean(Apart(:,4));
                 vq(isnan(vq)) = avg;
             end
             Da(:,i) = vq;
@@ -46,6 +46,7 @@ function [res, dtMesh, Da, T] = interpolate2D(A,B, dtMesh, Da, T)
         dtMesh = delaunayTriangulation(D);
     end
     
+    Da;
     
     [pl,bc] = dtMesh.pointLocation(B(:,2:3));
 	

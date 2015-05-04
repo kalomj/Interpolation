@@ -34,9 +34,26 @@ function [res, dtMesh, Da, T] = interpolate2D(A,B, dtMesh, Da, T)
                 vq = repmat(Apart(:,4),size(T,1),1);
             else
                 vq = interp1(Apart(:,1),Apart(:,4),T);
+                
 
-                %set all NaN to the mean value to prevent missing vales in later steps
-                avg = mean(vq(~isnan(vq)));
+                
+                
+                %set all NaN to the mean value to prevent missing values in later steps
+                Apart
+                T
+                vq
+                ~isnan(vq)
+                vq(~isnan(vq))
+                
+                %if the T value is less than the minimum in Apart, set to
+                %the value at the minimum time
+                T(T<min(Apart(:,1))) = A(A(:,1) == min(A(:,1)),4);
+                
+                %if the T value is greater than the maximum in Apart, set
+                %to the value at the maximum time
+                T(Tmax(Apart(:,1))) = A(A(:,1) == min(A(:,1)),4);
+                
+                avg = mean(vq(~isnan(vq)))
                 vq(isnan(vq)) = avg;
             end
             Da(:,i) = vq;
@@ -46,6 +63,7 @@ function [res, dtMesh, Da, T] = interpolate2D(A,B, dtMesh, Da, T)
         dtMesh = delaunayTriangulation(D);
     end
     
+    Da;
     
     [pl,bc] = dtMesh.pointLocation(B(:,2:3));
 	

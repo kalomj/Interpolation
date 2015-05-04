@@ -1,0 +1,21 @@
+% given a file path for an input file, in a tab seperated 
+% format returned by LOOCV.m
+%
+% Example:
+% number	t	lng	lat	pm25_measured pm25_interpolated
+%
+% Return an array of statistics
+function [res map] = fileParse(filepath, domain, scale)
+
+    inputTable = importdata(filepath,'\t',1);
+    A = inputTable.data;
+    
+    mae(i,j) = errperf(T,P,'mae');
+    mse(i,j) = errperf(T,P,'mse');
+    rmse(i,j) = errperf(T,P,'rmse');
+    mare(i,j) = errperf(T,P,'mare');
+    msre(i,j) = errperf(T,P,'msre');
+    rmsre(i,j) = errperf(T,P,'rmsre');
+    mape(i,j) = errperf(T,P,'mape');
+    mspe(i,j) = errperf(T,P,'mspe');
+    rmspe(i,j) = errperf(T,P,'rmspe');
