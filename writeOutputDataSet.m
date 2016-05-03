@@ -54,29 +54,58 @@ function writeOutputDataSet(fi1, fi2, domain, scale, fo, interp_type)
     %values, a million records are written to the output file at a time
     %this seems to be a good balance between memory use and speed
     n=floor(1000000/size(U,1));
-    %first is true on the first interation through the loop
-    first = true;
+    i=1;
     for b = 1:n:size(P,1)
-       
         %calculate begin and end indices to process
          e = b+n-1;
         if e > size(P,1)
            e = size(P,1);
         end
-        processing = [b e]
+        processing(i,:) = [b e];
+        i=i+1;
+    end
+       
+    %run first iteration to precalculate triangulations
+    
+    %x y t triples where we should interpolate
+    idtxy = cartprod3(P(b:e,:),U);
+    
+    %preinitialize variables that are only used in reduction method
+    %otherwise the parfor will choke when running the extension method
+    Da = 0;
+    T=0;
+    if strcmp(interp_type,'2D')
+           [txyw, dtMesh, Da, T] = interpolate2D(A(:,2:5),idtxy(:,2:4));
+    elseif ~strcmp(interp_type,'2D')
+           [txyw, dtMesh] = interpolate(A(:,2:5),idtxy(:,2:4));
+    end
 
+    %convert back to original time scale 
+    %(won't always be ymd format, could be ym or yq or y)
+    ymdxyw = convertT(txyw,1,map);
+
+    % O should be [id y m d w]
+    %(won't always be ymd format, could be ym or yq or y)     
+    %only copy the relevelt entries to the final matrix (from b to e)
+    O{1} = [idtxy(:,1) ymdxyw(:,1:end-3) ymdxyw(:,end:end)]; 
+    %end first iteration
+    
+    
+    %run the rest of the iterations in parallel
+    parfor j=2:size(processing,1)
+        b = processing(j,1);
+        e = processing(j,2);
+        
+        running = [b e]
+        
         %x y t triples where we should interpolate
         idtxy = cartprod3(P(b:e,:),U);
         
         %interpolate points
-        if strcmp(interp_type,'2D') & ~first
+        if strcmp(interp_type,'2D')
             txyw = interpolate2D(A(:,2:5),idtxy(:,2:4),dtMesh,Da, T);
-        elseif ~strcmp(interp_type,'2D') & ~first
+        elseif ~strcmp(interp_type,'2D')
             txyw = interpolate(A(:,2:5),idtxy(:,2:4),dtMesh);
-        elseif strcmp(interp_type,'2D') & first
-           [txyw, dtMesh,Da, T] = interpolate2D(A(:,2:5),idtxy(:,2:4));
-        elseif ~strcmp(interp_type,'2D') & first
-            [txyw, dtMesh] = interpolate(A(:,2:5),idtxy(:,2:4));
         else
             error('Bad conditional in writeOutputDataSet - all cases should be covered and we should not get here');
         end
@@ -88,12 +117,11 @@ function writeOutputDataSet(fi1, fi2, domain, scale, fo, interp_type)
         % O should be [id y m d w]
         %(won't always be ymd format, could be ym or yq or y)     
         %only copy the relevelt entries to the final matrix (from b to e)
-        O = [idtxy(:,1) ymdxyw(:,1:end-3) ymdxyw(:,end:end)];
-
-        %write data to file in append mode to preserve header string
-        %dlmwrite(fo,O,'-append','delimiter','\t','precision',12); 
-        
-        %set first flag to false since this is no longer the first run
-        first = false;
+        O{j} = [idtxy(:,1) ymdxyw(:,1:end-3) ymdxyw(:,end:end)];        
+    end
+    
+    %write data to file in append mode to preserve header string
+    for k = size(O,2)
+        %dlmwrite(fo,O{k},'-append','delimiter','\t','precision',12);
     end
 end

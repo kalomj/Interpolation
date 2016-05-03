@@ -35,8 +35,11 @@ end
 
 
 figure
+
 subplot(3,1,1);
 hold on
+xlabel('X') % x-axis label
+ylabel('Y') % y-axis label
 scatter(A(:,2),A(:,3),100,'red','*','LineWidth',1.5);
 
 triA = delaunayTriangulation(A(:,2:3));
@@ -45,7 +48,10 @@ hold off;
 
 subplot(3,1,2);
 hold on;
-scatter(T1(:,2),T1(:,3),125,'green','d','LineWidth',1.5);
+xlabel('X') % x-axis label
+ylabel('Y') % y-axis label
+scatter(T1(:,2),T1(:,3),125,'black','d','LineWidth',1.5);
+scatter(S1(:,2),S1(:,3),35,'red','d','LineWidth',1.5);
 
 triS1 = delaunayTriangulation(S1(:,2:3));
 triplot(triS1);
@@ -54,7 +60,10 @@ hold off;
 
 subplot(3,1,3);
 hold on;
-scatter(T2(:,2),T2(:,3),125,'green','d','LineWidth',1.5);
+xlabel('X') % x-axis label
+ylabel('Y') % y-axis label
+scatter(T2(:,2),T2(:,3),125,'black','d','LineWidth',1.5);
+scatter(S2(:,2),S2(:,3),35,'red','d','LineWidth',1.5);
 
 triS2 = delaunayTriangulation(S2(:,2:3));
 triplot(triS2);

@@ -24,7 +24,6 @@ function [res, dtMesh] = interpolate(A,B, dtMesh)
 	% pl are the coordinates of the vertex containing the query point 
 	% bc is the barycentric coordinates at each vertex with respect to the query point
     [pl,bc] = dtMesh.pointLocation(B);
-
     
     %deal with nulls by creating a vector which is true if value is null to
     %use in the for loop test. Then set rows with nan to an actual index to
@@ -33,7 +32,6 @@ function [res, dtMesh] = interpolate(A,B, dtMesh)
 	num_skips = sum(skipnan);
     pl(isnan(pl)) = 1;
 	
-
 	%extract values from A
 	V = A(:,4);
 	
@@ -46,7 +44,6 @@ function [res, dtMesh] = interpolate(A,B, dtMesh)
 	Vq = dot(bc',triVals')'; 
 	Vq(isnan(pl)) = NaN;
 	res = [B Vq];
-
 	
 	%this entire function can be replaced with griddata and produce equivalent results
 	%tic
